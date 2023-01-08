@@ -8,6 +8,7 @@ Step by step example:
 
 1. Add `ethereum-private-key-to-address` to your `Cargo.toml`:
 ```toml
+[dependencies]
 ethereum-private-key-to-address = "0.1"
 ```
 2. Import `PrivateKey` struct into your project:
