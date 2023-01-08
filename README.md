@@ -2,6 +2,8 @@
 
 This library will calculate ethereum address from a private key.
 
+[Documentation](https://docs.rs/ethereum-private-key-to-address/0.1.0/ethereum_private_key_to_address/)
+
 ## Calculate Address
 
 Step by step example to generate address:
