@@ -64,10 +64,12 @@ use ethereum_private_key_to_address::PrivateKey;
 
 let private_key = PrivateKey::from_str("<your private key as string>").unwrap();
 
-// Returns Full 65 byte Public Key including the prefix as a String. In this case prefix is 0x04. 0x04 is used to specify the type of the public key.
+// Returns Full 65 byte Public Key including the prefix as a String. In this case prefix is 0x04. 
+// 0x04 is used to specify the type of the public key.
 let full_public_key_with_prefix = private_key.public_key_full();
 
-// Returns Full 64 byte Public Key from Private Key without 0x04 in the front as a String. 0x04 is used to specify the type of the public key. 0x04 in front means the public key is uncompressed.
+// Returns Full 64 byte Public Key from Private Key without 0x04 in the front as a String. 
+// 0x04 is used to specify the type of the public key. 0x04 in front means the public key is uncompressed.
 let full_public_key = private_key.public_key();
 
 // Returns the x-coordiante of the public key as a string.
