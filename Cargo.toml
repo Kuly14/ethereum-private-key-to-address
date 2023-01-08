@@ -7,7 +7,7 @@ license = "MIT"
 readme = "README.md"
 repository = "https://github.com/Kuly14/ethereum-private-key-to-address"
 documentation = "https://docs.rs/ethereum-private-key-to-address/latest/ethereum-private-key-to-address"
-description = "Library that convers private key to valid ethereum address." 
+description = "Library that converts private key to valid ethereum address." 
 
 keywords = ["ethereum", "transaction", "crypto"]
 
