@@ -12,7 +12,7 @@ fn main() {
     // Keep in mind that hex::decode doesn't support non-hex characters so you will have to
     // remove the leading 0x
     let private_key =
-        hex::decode("92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e").unwrap();
+        hex::decode("5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a").unwrap();
     let private_key = PrivateKey::from_slice(&private_key).unwrap();
     println!("Address: {}", private_key.address());
 
@@ -24,7 +24,7 @@ fn main() {
 
     // From slice -> Public Key
     let private_key =
-        hex::decode("92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e").unwrap();
+        hex::decode("5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a").unwrap();
     let private_key = PrivateKey::from_slice(&private_key).unwrap();
     println!("Public Key: {}", private_key.public_key());
 }
