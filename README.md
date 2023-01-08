@@ -31,7 +31,7 @@ use ethereum_private_key_to_address::PrivateKey;
 let private_key = PrivateKey::from_str("<your private key as string>");
 
 // This will calculate your address from the given private key
-let address = private_key.address();
+let address = private_key.address().unwrap();
 
 println!("{}", address);
 ```
