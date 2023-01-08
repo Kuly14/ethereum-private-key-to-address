@@ -1,100 +1,84 @@
+use anyhow::{Context, Result};
 use secp256k1::{PublicKey, Secp256k1, SecretKey};
 use sha3::{Digest, Keccak256};
 use std::str::FromStr;
 
+/// PrivateKey struct that contains method that will convert your private key to an ethereum
+/// address
+///
+/// To calculate Ethereum address from your private key follow these steps:
+/// ```
+/// use std::str::FromStr;
+/// use ethereum_private_key_to_address::PrivateKey;
+///
+/// // 1.) Create PrivateKey struct from str.
+/// let private_key = PrivateKey::from_str("ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80").unwrap();
+///
+/// // 2.) Call the `address()` method on  your private key
+/// let address = private_key.address();
+/// ```
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct PrivateKey {
-    pub private_key: SecretKey,
+    /// Private Key
+    private_key: SecretKey,
 }
 
-#[derive(Debug, PartialEq, Eq)]
-pub struct PrivateKeyParsingError;
-
 impl FromStr for PrivateKey {
-    type Err = PrivateKeyParsingError;
+    type Err = anyhow::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let priv_key = s.replace("0x", "");
+        let private_key = s.replace("0x", "");
+        let private_key = SecretKey::from_str(&private_key)
+            .context("Problem parsing private key, check if your private key is correct")?;
 
-        Ok(Self {
-            private_key: SecretKey::from_str(&priv_key).unwrap(),
-        })
+        Ok(Self { private_key })
     }
 }
 
 impl From<secp256k1::SecretKey> for PrivateKey {
     fn from(value: secp256k1::SecretKey) -> Self {
-        Self {
-            private_key: value
-        }
+        Self { private_key: value }
     }
 }
 
 impl From<&[u8]> for PrivateKey {
     fn from(value: &[u8]) -> Self {
-        let private_key = SecretKey::from_slice(value).unwrap();
+        let private_key = SecretKey::from_slice(value).expect("Failed to parse the private key. Check if your encoding to &[u8] is correct and try again. Or you can try the from_str() method");
         Self { private_key }
     }
 }
 
 impl From<&[u8; 32]> for PrivateKey {
     fn from(value: &[u8; 32]) -> Self {
-        let private_key = SecretKey::from_slice(value).unwrap();
+        let private_key = SecretKey::from_slice(value).expect("Failed to parse the private key. Check if your encoding to &[u8] is correct and try again. Or you can try the from_str() method");
         Self { private_key }
     }
 }
 
 impl From<[u8; 32]> for PrivateKey {
     fn from(value: [u8; 32]) -> Self {
-        let private_key = SecretKey::from_slice(&value).unwrap();
+        let private_key = SecretKey::from_slice(&value).expect("Failed to parse the private key. Check if your encoding to &[u8] is correct and try again. Or you can try the from_str() method");
         Self { private_key }
     }
 }
 
 impl From<Vec<u8>> for PrivateKey {
     fn from(value: Vec<u8>) -> Self {
-        let private_key = SecretKey::from_slice(&value.to_vec()).unwrap();
+        let private_key = SecretKey::from_slice(&value.to_vec()).expect("Failed to parse the private key. Check if your encoding to &[u8] is correct and try again. Or you can try the from_str() method");
         Self { private_key }
     }
 }
 
 impl PrivateKey {
-    pub fn from_slice(slice: &[u8]) -> Self {
-        let private_key = SecretKey::from_slice(slice).unwrap();
-
-        Self { private_key }
-    }
-
-    pub fn public_key(&self) -> String {
-        let secp = Secp256k1::new();
-        let public_key = PublicKey::from_secret_key(&secp, &self.private_key);
-        hex::encode(&public_key.serialize_uncompressed()[1..])
-    }
-
-    pub fn public_key_full(&self) -> String {
-        let secp = Secp256k1::new();
-        let public_key = PublicKey::from_secret_key(&secp, &self.private_key);
-        hex::encode(public_key.serialize_uncompressed())
-    }
-
-    pub fn public_key_x(&self) -> String {
-        let secp = Secp256k1::new();
-        let public_key = PublicKey::from_secret_key(&secp, &self.private_key);
-        hex::encode(&public_key.serialize_uncompressed()[1..33])
-    }
-
-    pub fn public_key_y(&self) -> String {
-        let secp = Secp256k1::new();
-        let public_key = PublicKey::from_secret_key(&secp, &self.private_key);
-        hex::encode(&public_key.serialize_uncompressed()[33..])
-    }
-
-    pub fn public_key_slice(&self) -> [u8; 65] {
-        let secp = Secp256k1::new();
-        let public_key = PublicKey::from_secret_key(&secp, &self.private_key);
-        public_key.serialize_uncompressed()
-    }
-
+    /// Calculates the address from the private key
+    /// ```
+    /// use ethereum_private_key_to_address::PrivateKey;
+    /// use std::str::FromStr;
+    ///
+    /// let pk = PrivateKey::from_str("ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80").unwrap();
+    ///
+    /// println!("{}", pk.address());
+    /// ```
     pub fn address(&self) -> String {
         let secp = Secp256k1::new();
         let public_key = self.private_key.public_key(&secp);
@@ -106,34 +90,85 @@ impl PrivateKey {
         addr.insert_str(0, "0x");
         addr
     }
+
+    /// Converts your private key in the &[u8] format to PrivateKey struct
+    pub fn from_slice(slice: &[u8]) -> Result<Self> {
+        let private_key = SecretKey::from_slice(slice).context("Failed to parse given private key. Make sure your encoding is correct or try the from_str() method")?;
+
+        Ok(Self { private_key })
+    }
+
+    /// Returns Full 64 byte Public Key from Private Key without 0x04 in the front as a String. 0x04 is used to
+    /// specify the type of the public key. 0x04 in front means the public key is uncompressed
+    pub fn public_key(&self) -> String {
+        let secp = Secp256k1::new();
+        let public_key = PublicKey::from_secret_key(&secp, &self.private_key);
+        hex::encode(&public_key.serialize_uncompressed()[1..])
+    }
+
+    /// Returns Full 65 byte Public Key including the prefix as a String. In this case prefix is 0x04. 0x04 is used
+    /// to specify the type of the public key. If you want to get public key without the prefix
+    /// call the `public_key()` method.
+    pub fn public_key_full(&self) -> String {
+        let secp = Secp256k1::new();
+        let public_key = PublicKey::from_secret_key(&secp, &self.private_key);
+        hex::encode(public_key.serialize_uncompressed())
+    }
+
+    /// Returns the x-coordiante of the public key as a string.
+    pub fn public_key_x(&self) -> String {
+        let secp = Secp256k1::new();
+        let public_key = PublicKey::from_secret_key(&secp, &self.private_key);
+        hex::encode(&public_key.serialize_uncompressed()[1..33])
+    }
+
+    /// Returns the y-coordinate of the public key
+    pub fn public_key_y(&self) -> String {
+        let secp = Secp256k1::new();
+        let public_key = PublicKey::from_secret_key(&secp, &self.private_key);
+        hex::encode(&public_key.serialize_uncompressed()[33..])
+    }
+
+    /// Returns the entire public key in [u8; 65] format
+    pub fn public_key_slice(&self) -> [u8; 65] {
+        let secp = Secp256k1::new();
+        let public_key = PublicKey::from_secret_key(&secp, &self.private_key);
+        public_key.serialize_uncompressed()
+    }
 }
 
 #[cfg(test)]
 pub mod test {
-    use std::str::FromStr;
-    use hex::FromHex;
     use crate::PrivateKey;
+    use hex::FromHex;
+    use std::str::FromStr;
 
     fn test_account(priv_key: &str, addr: &str) {
         let private_key = PrivateKey::from_str(priv_key).unwrap();
-        assert_eq!(
-            addr,
-            private_key.address()
-        );
+        assert_eq!(addr, private_key.address());
     }
 
     #[test]
     fn test_account_one() {
-        test_account("ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266");
+        test_account(
+            "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+            "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+        );
     }
 
     #[test]
     fn test_account_two() {
-        test_account("0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d", "0x70997970c51812dc3a010c7d01b50e0d17dc79c8")
+        test_account(
+            "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d",
+            "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+        )
     }
     #[test]
     fn test_account_three() {
-        test_account("0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a", "0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc")
+        test_account(
+            "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a",
+            "0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc",
+        )
     }
 
     #[test]
@@ -192,7 +227,7 @@ pub mod test {
         let private_key = PrivateKey::from_slice(&private_key);
         assert_eq!(
             "0x976ea74026e726554db657fa54763abd0c3a0aa9",
-            private_key.address()
+            private_key.unwrap().address()
         );
     }
 }
