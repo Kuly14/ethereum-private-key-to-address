@@ -58,7 +58,7 @@ let private_key = PrivateKey::from_str("<your private key as string>").unwrap();
 let private_key = PrivateKey::from_slice("<your private key as &[u8]>").unwrap();
 ```
 
-4. There are multiple options when it comes to the public key. Since public key consists of: x-coordinate: 32 bytes, y-coordinate: 32 bytes, prefix: 1 byte. Here are all the methods you can use.
+4. There are multiple options when it comes to the public key. Since public key consists of: prefix: 1 byte, x-coordinate: 32 bytes, y-coordinate: 32 bytes. Here are all the methods you can use.
 ```rust
 use ethereum_private_key_to_address::PrivateKey;
 
