@@ -1,4 +1,4 @@
-use private_key_to_address::PrivateKey;
+use ethereum_private_key_to_address::PrivateKey;
 use std::str::FromStr;
 
 fn main() {
@@ -13,6 +13,6 @@ fn main() {
     // remove the leading 0x
     let pk =
         hex::decode("92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e").unwrap();
-    let pk = PrivateKey::from_slice(&pk);
+    let pk = PrivateKey::from_slice(&pk).unwrap();
     println!("Ethereum address: {}", pk.address());
 }

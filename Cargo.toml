@@ -1,5 +1,5 @@
 [package]
-name = "private-key-to-address"
+name = "ethereum-private-key-to-address"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,7 +7,6 @@ edition = "2021"
 
 [dependencies]
 sha3 = "0.10.6"
-ethereum-types = "0.14.1"
 hex = "0.4.3"
 secp256k1 = "0.25.0"
 anyhow = "1"
