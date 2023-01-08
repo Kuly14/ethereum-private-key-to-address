@@ -28,10 +28,10 @@ let private_key = PrivateKey::from_slice("<your private key as &[u8]>").unwrap()
 ```rust
 use ethereum_private_key_to_address::PrivateKey;
 
-let private_key = PrivateKey::from_str("<your private key as string>");
+let private_key = PrivateKey::from_str("<your private key as string>").unwrap();
 
 // This will calculate your address from the given private key
-let address = private_key.address().unwrap();
+let address = private_key.address();
 
 println!("{}", address);
 ```
